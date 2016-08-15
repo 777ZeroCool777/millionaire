@@ -47,4 +47,82 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.finished?).to be_falsey
     end
   end
+
+  # тесты на метод take_money
+  context '#take_money' do
+
+    it '#take prizes' do
+
+      prizes = [
+        100, 200, 300, 500, 1000,
+        2000, 4000, 8000, 16000, 32000,
+        64000, 125000, 250000, 500000
+      ]
+
+
+      2.times do
+        q = game_w_questions.current_game_question
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+      end
+
+      game_w_questions.take_money!
+
+      expect(game_w_questions.prize).to eq prizes[1]
+
+    end
+
+    # тест на миллион
+    it 'prize on million' do
+      15.times do
+        q = game_w_questions.current_game_question
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+      end
+
+      expect(game_w_questions.finished?).to be_truthy
+
+      expect(user.balance).to eq 1000000
+
+      expect(game_w_questions.status). to eq :won # метод .status возвращает победу
+
+    end
+  end
+
+  # проверка метода статус
+  context '#status' do
+
+    it '#status :fails' do
+      q = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(!q.correct_answer_key)
+
+      expect(game_w_questions.status).to eq :fail
+    end
+
+    it '#status :money' do
+
+      game_w_questions.current_game_question
+
+      game_w_questions.take_money!
+
+      expect(game_w_questions.status).to eq :money
+
+    end
+
+  end
+
+  context '#status :timeout' do
+
+    before(:each) do
+      game_w_questions.finished_at = Time.now
+    end
+
+    it 'timeout' do
+      game_w_questions.created_at = 36.minutes.ago
+
+      game_w_questions.is_failed = true
+
+      expect(game_w_questions.status).to eq :timeout
+    end
+
+  end
+
 end
