@@ -53,21 +53,16 @@ RSpec.describe Game, type: :model do
 
     it '#take prizes' do
 
-      prizes = [
-        100, 200, 300, 500, 1000,
-        2000, 4000, 8000, 16000, 32000,
-        64000, 125000, 250000, 500000
-      ]
-
-
       2.times do
         q = game_w_questions.current_game_question
         game_w_questions.answer_current_question!(q.correct_answer_key)
       end
 
+      GC.start()
+
       game_w_questions.take_money!
 
-      expect(game_w_questions.prize).to eq prizes[1]
+      expect(game_w_questions.prize).to eq 200
 
     end
 
@@ -78,11 +73,13 @@ RSpec.describe Game, type: :model do
         game_w_questions.answer_current_question!(q.correct_answer_key)
       end
 
+      GC.start()
+
       expect(game_w_questions.finished?).to be_truthy
 
       expect(user.balance).to eq 1000000
 
-      expect(game_w_questions.status). to eq :won # метод .status возвращает победу
+      expect(game_w_questions.status).to eq :won # метод .status возвращает победу
 
     end
   end
@@ -121,6 +118,99 @@ RSpec.describe Game, type: :model do
       game_w_questions.is_failed = true
 
       expect(game_w_questions.status).to eq :timeout
+    end
+
+  end
+
+  context '#correct_answer_key' do
+
+    it 'true' do
+      q = game_w_questions.current_game_question
+
+      expect(game_w_questions.answer_current_question!(q.correct_answer_key)).to be_truthy
+      expect(game_w_questions.answer_current_question!(!q.correct_answer_key)).to be_falsey
+    end
+
+  end
+
+  context 'current_game_question' do
+
+    it 'current_game' do
+        game = game_w_questions
+
+        l = game.current_level
+
+        expect(game.game_questions[l]).to eq game.current_game_question
+
+    end
+
+    it '#previos_game_question' do
+      expect(game_w_questions.previous_game_question).to eq nil
+
+      q = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+
+      expect(game_w_questions.previous_game_question).to eq q
+    end
+
+    it 'previous_level' do
+
+      q = game_w_questions.current_game_question
+
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+
+      expect(q.level).to eq game_w_questions.previous_level
+    end
+
+  end
+
+  # группа тестов на метод answer_current_question!
+  context '#answer_current_question!' do
+
+    it 'true our false' do
+      q = game_w_questions.current_game_question
+
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+
+      expect(
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+      ).to eq true
+
+      expect(
+        game_w_questions.answer_current_question!(!q.correct_answer_key)
+      ).to eq false
+
+    end
+
+    # очередной тест на миллион
+    it 'on million' do
+      q = game_w_questions.current_game_question
+
+      count_level = 14
+
+      14.times do
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+
+        if count_level == 1
+          game_w_questions.take_money!
+          expect(game_w_questions.prize).to eq 500000
+        end
+        count_level -= 1
+      end
+
+      GC.start()
+
+    end
+
+    it 'answer for timeout' do
+      q = game_w_questions.current_game_question
+
+      game_w_questions.created_at = 36.minutes.ago
+
+      expect(
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+      ).to eq false
+
     end
 
   end
