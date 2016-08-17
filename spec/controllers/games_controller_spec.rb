@@ -144,6 +144,13 @@ RSpec.describe GamesController, type: :controller do
       expect(response).to redirect_to user_path(user)
     end
 
+    # проверка, что игрок может заюзать подсказку  50/50
+    it '50/50' do
+      expect(game_w_questions.current_game_question.help_hash[:fifty_fifty_used]).not_to be
+
+      expect(put :help, id: game_w_questions.id, help_type: :fifty_fifty_used).to be
+    end
+
   end
 
 end
