@@ -79,6 +79,71 @@ RSpec.describe GamesController, type: :controller do
       expect(game.current_game_question.help_hash[:audience_help].keys).to contain_exactly('a', 'b', 'c', 'd')
       expect(response).to redirect_to(game_path(game))
     end
+
+    # тест на то, что пользователь не может смотреть чужую игру
+    it 'not current show game' do
+
+      fake_user = FactoryGirl.create(:game_with_questions)
+
+      get :show, id: fake_user.id
+
+      expect(response.status).not_to eq(200)
+    end
+
+    # проверка, что пользователь не может начать игру пока не закончит первую
+    it 'user dont have second game' do
+      generate_questions(60)
+
+      post :create
+
+      game1 = assigns(:game)
+
+      # проверяю состояние этой игры
+      expect(game1.finished?).to be_falsey
+      expect(game1.user).to eq(user)
+
+      expect(response).to redirect_to game_path(game1)
+      expect(flash[:notice]).to be
+
+      post :create
+
+      fake_game = assigns(:game)
+
+      expect(response).to redirect_to game_path(game1)
+      expect(flash[:alert]).to eq I18n.t('controllers.games.game_not_finished')
+      expect(fake_game.id).to eq game1.id
+    end
+
+    # проверка, когда пользователь берет лаве
+    it '#take_money controller' do
+      q = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+
+      put :take_money, id: game_w_questions.id
+
+      game = assigns(:game)
+
+      expect(game.finished?).to be_truthy
+
+      expect(response).to redirect_to user_path(user)
+      expect(flash[:warning]).to be
+
+    end
+
+    # проверка, неправильного ответа игрока
+    it 'not correct answer' do
+      q = game_w_questions.current_game_question
+      put :answer, id: game_w_questions.id, letter: game_w_questions.answer_current_question!(!q.correct_answer_key)
+
+      game = assigns(:game)
+
+      expect(game.finished?).to be_truthy
+
+      expect(flash[:alert]).to be
+
+      expect(response).to redirect_to user_path(user)
+    end
+
   end
 
 end
