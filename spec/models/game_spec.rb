@@ -161,26 +161,30 @@ RSpec.describe Game, type: :model do
       expect(
         game_w_questions.answer_current_question!(q.correct_answer_key)
       ).to eq true
+
+      expect(game_w_questions.finished?).to be_falsey
     end
 
     # случай, когда ответ неправильный
     it 'false' do
-      q = game_w_questions.current_game_question
+      game_w_questions.current_game_question.update_attributes(a: 1, b: 2, c: 3, d: 4)
 
-      game_w_questions.answer_current_question!(q.correct_answer_key)
+      q = game_w_questions.current_game_question.variants.keys[1]
 
       expect(
-        game_w_questions.answer_current_question!(!q.correct_answer_key)
+        game_w_questions.answer_current_question!(q)
       ).to eq false
+
+      expect(game_w_questions.finished?).to be_truthy
     end
 
     # случай, когда ответ последний на миллион
     it 'on million' do
-      q = game_w_questions.current_game_question
 
       count_level = 14
 
       14.times do
+        q = game_w_questions.current_game_question
         game_w_questions.answer_current_question!(q.correct_answer_key)
 
         if count_level == 1
@@ -193,6 +197,7 @@ RSpec.describe Game, type: :model do
 
     # случай, когда ответ дан после истечении времени
     it 'answer for timeout' do
+
       q = game_w_questions.current_game_question
 
       game_w_questions.created_at = 36.minutes.ago
@@ -200,6 +205,10 @@ RSpec.describe Game, type: :model do
       expect(
         game_w_questions.answer_current_question!(q.correct_answer_key)
       ).to eq false
+
+      expect(game_w_questions.status).to eq :timeout
+
+      expect(game_w_questions.finished?).to be_truthy
 
     end
 
