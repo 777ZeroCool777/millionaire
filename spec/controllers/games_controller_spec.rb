@@ -10,6 +10,8 @@ RSpec.describe GamesController, type: :controller do
   # игра с прописанными игровыми вопросами
   let(:game_w_questions) { FactoryGirl.create(:game_with_questions, user: user) }
 
+  let(:game_question) { FactoryGirl.create(:game_question, a: 2, b: 1, c: 4, d: 3) }
+
   context 'Anon' do
     it 'kick from #show' do
       get :show, id: game_w_questions.id
@@ -165,8 +167,8 @@ RSpec.describe GamesController, type: :controller do
 
     # проверка, неправильного ответа игрока
     it 'not correct answer' do
-      q = game_w_questions.current_game_question
-      put :answer, id: game_w_questions.id, letter: game_w_questions.answer_current_question!(!q.correct_answer_key)
+      game_w_questions.current_game_question.update_attributes(a: 1, b: 2, c: 3, d: 4)
+      put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.variants.keys[3]
 
       game = assigns(:game)
 
