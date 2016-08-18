@@ -118,17 +118,6 @@ RSpec.describe Game, type: :model do
 
   end
 
-  context '#correct_answer_key' do
-
-    it 'true' do
-      q = game_w_questions.current_game_question
-
-      expect(game_w_questions.answer_current_question!(q.correct_answer_key)).to be_truthy
-      expect(game_w_questions.answer_current_question!(!q.correct_answer_key)).to be_falsey
-    end
-
-  end
-
   context 'current_game_question' do
 
     it 'current_game' do
@@ -163,7 +152,8 @@ RSpec.describe Game, type: :model do
   # группа тестов на метод answer_current_question!
   context '#answer_current_question!' do
 
-    it 'true our false' do
+    # случай, когда ответ правильный
+    it 'true' do
       q = game_w_questions.current_game_question
 
       game_w_questions.answer_current_question!(q.correct_answer_key)
@@ -171,14 +161,20 @@ RSpec.describe Game, type: :model do
       expect(
         game_w_questions.answer_current_question!(q.correct_answer_key)
       ).to eq true
+    end
+
+    # случай, когда ответ неправильный
+    it 'false' do
+      q = game_w_questions.current_game_question
+
+      game_w_questions.answer_current_question!(q.correct_answer_key)
 
       expect(
         game_w_questions.answer_current_question!(!q.correct_answer_key)
       ).to eq false
-
     end
 
-    # очередной тест на миллион
+    # случай, когда ответ последний на миллион
     it 'on million' do
       q = game_w_questions.current_game_question
 
@@ -195,6 +191,7 @@ RSpec.describe Game, type: :model do
       end
     end
 
+    # случай, когда ответ дан после истечении времени
     it 'answer for timeout' do
       q = game_w_questions.current_game_question
 
