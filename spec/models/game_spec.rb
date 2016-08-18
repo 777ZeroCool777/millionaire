@@ -58,8 +58,6 @@ RSpec.describe Game, type: :model do
         game_w_questions.answer_current_question!(q.correct_answer_key)
       end
 
-      GC.start()
-
       game_w_questions.take_money!
 
       expect(game_w_questions.prize).to eq 200
@@ -72,8 +70,6 @@ RSpec.describe Game, type: :model do
         q = game_w_questions.current_game_question
         game_w_questions.answer_current_question!(q.correct_answer_key)
       end
-
-      GC.start()
 
       expect(game_w_questions.finished?).to be_truthy
 
@@ -197,9 +193,6 @@ RSpec.describe Game, type: :model do
         end
         count_level -= 1
       end
-
-      GC.start()
-
     end
 
     it 'answer for timeout' do

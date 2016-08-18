@@ -10,4 +10,14 @@ RSpec.describe Question, type: :model do
     it { should_not allow_value(500).for(:level) }
     it { should allow_value(14).for(:level) }
   end
+
+  # тесты на метод correct_answer_key
+  context '#correct_answer_key' do
+    it 'true answer' do
+      expect(correct_answer_key).to eq 1
+    end
+  end
+
+
+
 end

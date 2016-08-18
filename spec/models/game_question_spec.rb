@@ -41,32 +41,11 @@ RSpec.describe GameQuestion, type: :model do
     end
   end
 
-  it 'validates uniqness' do
-    validate_uniqueness_of :game_question
-  end
+  context '#correct_answer_key' do
 
-  context 'text for GameQuestion' do
-
-    it 'validates present' do
-      validate_acceptance_of game_question.text
+    it 'true answer' do
+      expect(game_question.correct_answer_key).to eq 'b'
     end
-
-    it 'validates uniqueness' do
-      validate_uniqueness_of game_question.text
-    end
-
-  end
-
-  context 'level for GameQuestion' do
-
-    it 'validates present' do
-      validate_acceptance_of game_question.level
-    end
-
-    it 'validates uniqueness' do
-      validate_uniqueness_of game_question.level
-    end
-
   end
 
 end
