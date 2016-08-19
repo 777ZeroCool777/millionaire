@@ -52,6 +52,11 @@ class GameQuestion < ActiveRecord::Base
     {a => 'a', b => 'b', c => 'c', d => 'd'}[1]
   end
 
+  # ключ неправильного ответа для подсказки 50/50
+  def fake_answer_key
+    {a => 'a', b => 'b', c => 'c', d => 'd'}[2]
+  end
+
   # текст правильного ответа
   def correct_answer
     variants[correct_answer_key]
@@ -64,6 +69,16 @@ class GameQuestion < ActiveRecord::Base
       'c' => rand(100),
       'd' => rand(100)
     }
+    save
+  end
+
+  def add_fifty_fifty
+    self.help_hash[:fifty_fifty] = [correct_answer_key, fake_answer_key]
+    save
+  end
+
+  def add_friend_call
+    "Василий петрович считает, что правильный ответ #{correct_answer_key}"
     save
   end
 

@@ -116,8 +116,7 @@ class Game < ActiveRecord::Base
     end
   end
 
-  # todo: Пока реализована поддержка только :audience_help
-  #
+
   # Возвращает true, если подсказка применилась успешно,
   # false если подсказка уже заюзана.
   def use_help(help_type)
@@ -128,6 +127,18 @@ class Game < ActiveRecord::Base
           # ActiveRecord метод toggle! переключает булевое поле сразу в базе
           toggle!(:audience_help_used)
           current_game_question.add_audience_help
+          return true
+        end
+      when :fifty_fifty
+        unless fifty_fifty_used
+          toggle!(:fifty_fifty_used)
+          current_game_question.add_fifty_fifty
+          return true
+        end
+      when :friend_call
+        unless friend_call_used
+          toggle!(:friend_call_used)
+          current_game_question.add_friend_call
           return true
         end
     end

@@ -179,17 +179,24 @@ RSpec.describe GamesController, type: :controller do
 
     # проверка, что игрок может заюзать подсказку  50/50
     it '50/50' do
+      expect(game_w_questions.current_game_question.help_hash[:fifty_fifty]).not_to be
+      expect(game_w_questions.fifty_fifty_used).to be_falsey
+
+      game_w_questions.current_game_question.update_attributes(a: 4, b: 1, c: 2, d: 3)
+
+      v1 = game_w_questions.current_game_question.variants.keys[1]
+      v2 = game_w_questions.current_game_question.variants.keys[2]
+
       put :help, id: game_w_questions.id, help_type: :fifty_fifty
 
       game = assigns(:game)
 
       expect(game.finished?).to be_falsey
+      expect(game.fifty_fifty_used).to be_truthy
+      expect(game.current_game_question.help_hash[:fifty_fifty]).to be
+      expect(game.current_game_question.help_hash[:fifty_fifty].to_a).to contain_exactly(v1, v2)
       expect(response).to redirect_to(game_path(game))
       expect(flash[info: I18n.t('controllers.games.help_used')])
-
-      # поскольку use_help реализован только для :audience_help подсказку можно заюзать сколько угодно
-      expect(game.current_game_question.help_hash[:fifty_fifty]).not_to be
-      expect(game.fifty_fifty_used).to be_falsey
 
     end
   end
