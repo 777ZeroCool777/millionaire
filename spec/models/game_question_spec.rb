@@ -36,9 +36,39 @@ RSpec.describe GameQuestion, type: :model do
 
       game_question.add_audience_help
 
-        expect(game_question.help_hash).to include(:audience_help)
-        expect(game_question.help_hash[:audience_help].keys).to contain_exactly('a', 'b', 'c', 'd')
+      expect(game_question.help_hash).to include(:audience_help)
+      expect(game_question.help_hash[:audience_help].keys).to contain_exactly('a', 'b', 'c', 'd')
     end
+
+    it 'correct fifty_fifty' do
+      expect(game_question.help_hash).not_to include(:fifty_fifty)
+
+      v1 = game_question.variants.keys[1]
+      v2 = game_question.variants.keys[0]
+
+      game_question.add_fifty_fifty
+
+      expect(game_question.help_hash).to include(:fifty_fifty)
+      expect(
+        game_question.help_hash[:fifty_fifty].to_a
+      ).to contain_exactly(v1, v2)
+
+      expect(game_question.help_hash[:fifty_fifty].size).to eq 2
+
+    end
+
+    it 'correct friend_call' do
+      expect(game_question.help_hash).not_to include(:friend_call)
+
+      game_question.add_friend_call
+
+      expect(game_question.help_hash).to include(:friend_call)
+
+      expect(
+        game_question.help_hash[:friend_call]
+      ).to include("считает, что это вариант")
+    end
+
   end
 
   context '#correct_answer_key' do
