@@ -156,8 +156,6 @@ RSpec.describe Game, type: :model do
     it 'true' do
       q = game_w_questions.current_game_question
 
-      game_w_questions.answer_current_question!(q.correct_answer_key)
-
       expect(
         game_w_questions.answer_current_question!(q.correct_answer_key)
       ).to eq true
